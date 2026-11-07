@@ -1,6 +1,7 @@
 .env
 .venv/
 venv/
+.serena/
 __pycache__/
 *.pyc
 *.egg-info/
