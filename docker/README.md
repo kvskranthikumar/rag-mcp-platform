@@ -21,6 +21,8 @@ docker run --rm -p 8080:8080 --env-file .env rag-mcp-platform-ingest-ui
 
 Both containers connect to an external PostgreSQL instance and embedding provider. Create the database schema with `rag-mcp-platform init-db` before starting ingestion. Inject secrets through your runtime environment or secret manager; do not copy credentials into an image. Local sample documents are not copied into the containers.
 
+The MCP image binds to `0.0.0.0` and requires `MCP_API_KEY`; provide it through the runtime environment or secret manager. The ingestion UI has no built-in authentication and must only be exposed through an authenticated ingress or trusted private network.
+
 The MCP HTTP endpoint is `/mcp`, with `GET /health` for health checks. The ingestion UI listens on port `8080` in the container. If a reverse proxy forwards a path prefix, set `STREAMLIT_SERVER_BASE_URL_PATH` to the same prefix and preserve WebSocket forwarding.
 
 For a registry, replace the local image tags with your own registry and version tags. This guide intentionally contains no organization-specific subscriptions, registry names, hostnames, or deployment paths.

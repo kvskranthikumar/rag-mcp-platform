@@ -41,7 +41,7 @@ python -m pip install -e ".[web,ingest-ui,mcp-http]"
 Copy-Item .env.example .env
 ```
 
-Set `DATABASE_URL` and provider settings in `.env`. For Azure OpenAI, configure `EMBEDDING_PROVIDER=azure`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, and `AZURE_EMBEDDING_DEPLOYMENT`. Set `LLM_PROVIDER` and the matching LLM settings only when using the web app's answer endpoint or the CLI `ask` command. MCP search returns passages; the MCP host's model composes the response.
+Set `DATABASE_URL` and provider settings in `.env`. For Azure OpenAI, configure `EMBEDDING_PROVIDER=azure`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, and `AZURE_EMBEDDING_DEPLOYMENT`. Hosted providers are blocked by default. Set `ALLOW_EXTERNAL_DATA=true` only after approving the transfer: embedding providers receive document chunks and search queries, while answer providers receive the question and retrieved passages. PII replacement is not a confidentiality control. For local inference, use `EMBEDDING_PROVIDER=local` with a compatible local model and `LLM_PROVIDER=ollama` at its default loopback URL. Set `LLM_PROVIDER` and the matching LLM settings only when using the web app's answer endpoint or the CLI `ask` command. MCP search returns passages; the MCP host's model composes the response.
 
 Langfuse tracing is optional. Install it with `python -m pip install -e ".[observability]"`, set `LANGFUSE_ENABLED=true`, and configure `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL`. Ingestion, retrieval, embedding, reranking, and answer-generation spans are correlated and flushed at process exit. Traces include stage names, counts, durations, model identifiers, token usage, and safe error classes; document text, queries, prompts, model outputs, paths, and exception messages are not sent.
 
@@ -81,12 +81,13 @@ Settings are loaded from OS environment variables and, for local development, th
 | `EMBEDDING_BATCH_SIZE` | Maximum hosted inputs per request. |
 | `EMBEDDING_MAX_INPUT_TOKENS`, `EMBEDDING_BATCH_MAX_TOKENS` | Per-input and per-request token limits. |
 | `EMBEDDING_MAX_RETRIES`, `EMBEDDING_TIMEOUT_SECONDS` | Hosted SDK retry and timeout bounds. |
+| `ALLOW_EXTERNAL_DATA` | Explicitly permit hosted inference or a non-loopback Ollama endpoint to receive document/query content; defaults to `false`. |
 | `EMBEDDING_REUSE_ENABLED` | Reuse exact matching chunk embeddings from the active index; defaults to false. |
 | `CHUNK_MAX_TOKENS`, `CHUNK_OVERLAP_TOKENS` | Chunk bounds and overlap. |
 | `INGESTION_PIPELINE_VERSION` | Processing version used to detect stale chunks; defaults to `10`. |
 | `LLM_PROVIDER`, `LLM_MODEL` | Optional answer-generation provider and model. |
 | `LANGFUSE_ENABLED` | Enable optional Langfuse tracing; defaults to `false`. |
-| `MCP_API_KEY` | Optional bearer token for hosted MCP HTTP. |
+| `MCP_API_KEY` | Bearer token required for MCP HTTP on non-loopback hosts. |
 
 See `.env.example` for provider-specific variables. Model or embedding-version changes require a complete isolated index rebuild; `--full` cannot bypass the embedding-space compatibility guard.
 
@@ -140,6 +141,7 @@ Containers connect to an external PostgreSQL instance and embedding service. Inj
 - HTML headings, tables, code, and allowlisted metadata are retained. DOCX paragraphs and tables preserve order. PDF text and detected tables retain physical page provenance.
 - Oversized prose is split within token bounds; tables, code, and lists split at structural boundaries where possible.
 - The default PII policy replaces detected English identifiers with entity placeholders before chunking, embedding, storage, or preview, then continues processing. It remains rule-based and non-comprehensive. Screening or anonymization failures stop processing; previously indexed content is not automatically purged.
+- Hosted inference is disabled unless `ALLOW_EXTERNAL_DATA=true`. Even after PII replacement, confidential business text may remain and is sent to the configured endpoint when that opt-in is enabled. PostgreSQL still stores document content; use an approved database endpoint and restrict network egress at the host or deployment boundary for a strict no-egress requirement.
 - OCR remains manual. Prepare text-enabled PDFs before ingestion.
 - Audience metadata is descriptive only; document- or tenant-level authorization is not implemented.
 - Original uploads are not retained after staging cleanup.

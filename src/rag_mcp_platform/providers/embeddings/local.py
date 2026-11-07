@@ -27,7 +27,7 @@ class LocalEmbeddingProvider(EmbeddingProvider):
         self.model_id = model
         self.name = f"local:{model}"
         self.batch_size = batch_size
-        self._model = SentenceTransformer(model, trust_remote_code=True)
+        self._model = SentenceTransformer(model, trust_remote_code=False)
         self._q_prefix, self._d_prefix = _instruction_prefixes(model)
 
         actual_dim = self._model.get_sentence_embedding_dimension()

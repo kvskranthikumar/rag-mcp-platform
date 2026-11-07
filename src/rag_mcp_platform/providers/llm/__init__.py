@@ -3,9 +3,20 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from ipaddress import ip_address
+from urllib.parse import urlsplit
 
 from ...settings import get_settings
+from ...settings import require_external_data_permission
 from .base import LLMProvider
+
+
+def _is_loopback_endpoint(endpoint: str) -> bool:
+    try:
+        host = urlsplit(endpoint).hostname
+        return host == "localhost" or bool(host and ip_address(host).is_loopback)
+    except ValueError:
+        return False
 
 
 @lru_cache
@@ -14,6 +25,7 @@ def get_llm_provider() -> LLMProvider:
     provider = s.llm_provider.lower()
 
     if provider == "openai":
+        require_external_data_permission(s, "OpenAI chat")
         from .openai_provider import OpenAILLMProvider
 
         return OpenAILLMProvider(
@@ -23,6 +35,7 @@ def get_llm_provider() -> LLMProvider:
         )
 
     if provider == "azure":
+        require_external_data_permission(s, "Azure OpenAI chat")
         from .openai_provider import OpenAILLMProvider
 
         return OpenAILLMProvider(
@@ -35,11 +48,14 @@ def get_llm_provider() -> LLMProvider:
         )
 
     if provider == "gemini":
+        require_external_data_permission(s, "Google Gemini")
         from .gemini_provider import GeminiLLMProvider
 
         return GeminiLLMProvider(model=s.llm_model, api_key=s.google_api_key)
 
     if provider == "ollama":
+        if not _is_loopback_endpoint(s.ollama_base_url):
+            require_external_data_permission(s, "Remote Ollama")
         from .ollama_provider import OllamaLLMProvider
 
         return OllamaLLMProvider(model=s.llm_model, base_url=s.ollama_base_url)

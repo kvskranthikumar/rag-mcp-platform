@@ -111,10 +111,19 @@ def main_stdio() -> None:
     build_mcp().run(transport="stdio")
 
 
+def _require_http_auth(settings) -> None:
+    host = settings.mcp_host.strip("[]").lower()
+    if host not in {"127.0.0.1", "localhost", "::1"} and not settings.mcp_api_key:
+        raise PermissionError(
+            "MCP_API_KEY is required when the MCP HTTP server binds to a non-loopback host."
+        )
+
+
 def main_http() -> None:
     import uvicorn
 
     settings = get_settings()
+    _require_http_auth(settings)
     mcp = build_mcp()
     app = mcp.streamable_http_app()
     if settings.mcp_api_key:

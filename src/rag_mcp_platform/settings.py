@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     embedding_reuse_enabled: bool = False
     chunk_insert_batch_size: int = 200
     langfuse_enabled: bool = False
+    allow_external_data: bool = False
     # Optional model/version tag. Azure encapsulates the model version in the
     # deployment, so the API does not need it; this value is recorded with each
     # document to detect embedding-space changes (see embedding_signature).
@@ -112,6 +113,14 @@ class Settings(BaseSettings):
         if self.embedding_version:
             parts.append(self.embedding_version)
         return ":".join(parts)
+
+
+def require_external_data_permission(settings: Settings, provider: str) -> None:
+    if not settings.allow_external_data:
+        raise PermissionError(
+            f"{provider} sends document or query content outside the local process. "
+            "Set ALLOW_EXTERNAL_DATA=true only after approving this transfer."
+        )
 
 
 @lru_cache

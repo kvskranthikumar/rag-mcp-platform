@@ -11,7 +11,7 @@ class OllamaLLMProvider(LLMProvider):
 
         self.name = f"ollama:{model}"
         self._model = model
-        self._client = httpx.Client(base_url=base_url, timeout=120.0)
+        self._client = httpx.Client(base_url=base_url, timeout=120.0, trust_env=False)
 
     def complete(self, system: str, user: str, temperature: float = 0.1) -> str:
         resp = self._client.post(

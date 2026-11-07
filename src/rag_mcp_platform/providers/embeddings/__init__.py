@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from ...settings import get_settings
+from ...settings import get_settings, require_external_data_permission
 from .base import EmbeddingProvider
 
 
@@ -30,6 +30,7 @@ def get_embedding_provider() -> EmbeddingProvider:
     }
 
     if provider == "openai":
+        require_external_data_permission(s, "OpenAI embeddings")
         from .openai_provider import OpenAIEmbeddingProvider
 
         return OpenAIEmbeddingProvider(
@@ -42,6 +43,7 @@ def get_embedding_provider() -> EmbeddingProvider:
         )
 
     if provider == "azure":
+        require_external_data_permission(s, "Azure OpenAI embeddings")
         from .openai_provider import OpenAIEmbeddingProvider
 
         return OpenAIEmbeddingProvider(
