@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "path": "docs/getting-started.md",
+      "expected_text": ["Create a workspace", "Submit a document", "Review the result"],
+      "forbidden_text": ["Navigation noise"],
+      "expected_section_paths": [["Getting Started", "Configure a workspace"]],
+      "min_chunks": 1,
+      "max_chunk_tokens": 700
+    },
+    {
+      "path": "docs/operations-guide.md",
+      "expected_text": ["Monitor processing", "Change an embedding model"],
+      "expected_section_paths": [["Operations Guide", "Monitor processing"]],
+      "min_chunks": 1,
+      "max_chunk_tokens": 700
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentation Assistant</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="dot"></span>
+          <h1>Documentation Assistant</h1>
+        </div>
+        <div id="status" class="status" title="Backend configuration">connecting…</div>
+      </header>
+
+      <main id="chat" class="chat">
+        <div class="empty" id="empty">
+          <h2>Ask about your indexed documents</h2>
+          <p>Answers are grounded in your indexed docs and include source citations.</p>
+          <div class="examples" id="examples"></div>
+        </div>
+      </main>
+
+      <form id="composer" class="composer" autocomplete="off">
+        <textarea
+          id="input"
+          rows="1"
+          placeholder="Ask a question about the documentation…"
+        ></textarea>
+        <button id="send" type="submit" aria-label="Send">Send</button>
+      </form>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
